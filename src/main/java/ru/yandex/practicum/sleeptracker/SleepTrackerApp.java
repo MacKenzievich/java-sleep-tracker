@@ -10,8 +10,7 @@ public class SleepTrackerApp {
     public static void main(String[] args) {
 
         List<String> stringList = new ArrayList<>();
-        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream
-                ("src/main/resources/sleep_log.txt"), StandardCharsets.UTF_8))) {
+        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream("src/main/resources/sleep_log.txt"), StandardCharsets.UTF_8))) {
             String line;
             while ((line = bufferedReader.readLine()) != null) {
                 stringList.add(line);
@@ -36,8 +35,7 @@ public class SleepTrackerApp {
         functionsList.add(new FoundUserType());
 
         if (!sleepingSessionList.isEmpty()) {
-            functionsList.stream()
-                    .forEach(f -> System.out.println(f.analyze(sleepingSessionList)));
+            functionsList.stream().forEach(f -> System.out.println(f.analyze(sleepingSessionList)));
         } else {
             System.out.println("Список сессий пуст!");
         }
