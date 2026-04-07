@@ -26,11 +26,11 @@ public class FoundUserType implements SleepAnalysisFunction {
                         pigeon[0]++; // голубь
                     }
                 });
-        if (owl[0] > lark[0] && owl[0] > pigeon[0]){
+        if (owl[0] > lark[0] && owl[0] > pigeon[0]) {
             userType = UserType.OWL;
         } else if (lark[0] > owl[0] && lark[0] > pigeon[0]) {
             userType = UserType.LARK;
-        } else if (pigeon[0] > owl[0] && pigeon[0] > lark[0]){
+        } else if (pigeon[0] > owl[0] && pigeon[0] > lark[0]) {
             userType = UserType.PIGEON;
         } else {
             userType = UserType.PIGEON;
