@@ -159,6 +159,35 @@ public class SleepTrackerAppTest {
 
         SleepAnalysisResult result2 = foundUserType.analyze(sessions);
         assertEquals(UserType.OWL, result2.getResult());
+
+        sessions.add(new SleepingSession(
+                LocalDateTime.of(2024, 4, 10, 22, 1),
+                LocalDateTime.of(2024, 4, 11, 5, 15),
+                "NORMAL"));
+
+        sessions.add(new SleepingSession(
+                LocalDateTime.of(2024, 4, 10, 21, 1),
+                LocalDateTime.of(2024, 4, 11, 5, 30),
+                "NORMAL"));
+
+        sessions.add(new SleepingSession(
+                LocalDateTime.of(2024, 4, 10, 20, 1),
+                LocalDateTime.of(2024, 4, 11, 4, 0),
+                "NORMAL"));
+
+        sessions.add(new SleepingSession(
+                LocalDateTime.of(2024, 4, 10, 10, 1),
+                LocalDateTime.of(2024, 4, 11, 3, 0),
+                "NORMAL"));
+
+        sessions.add(new SleepingSession(
+                LocalDateTime.of(2024, 4, 10, 22, 1),
+                LocalDateTime.of(2024, 4, 11, 6, 0),
+                "NORMAL"));
+
+        SleepAnalysisResult result3 = foundUserType.analyze(sessions);
+        assertEquals(UserType.PIGEON, result3.getResult());  //одинаковое количество.
+
     }
 
 
@@ -167,11 +196,11 @@ public class SleepTrackerAppTest {
         List<SleepingSession> nightSessions = new ArrayList<>();
         // с 22:00 до 23:00
         nightSessions.add(new SleepingSession(LocalDateTime.of(2024, 4, 10, 22, 0),
-                LocalDateTime.of(2024, 4, 10, 23, 0),
+                LocalDateTime.of(2024, 4, 10, 22, 59),
                 "NORMAL"));
         //с 23:30 до 00:30 следующего дня
         nightSessions.add(new SleepingSession(LocalDateTime.of(2024, 4, 11, 23, 30),
-                LocalDateTime.of(2024, 4, 12, 0, 30),
+                LocalDateTime.of(2024, 4, 12, 3, 30),
                 "NORMAL"));
 
         SleepAnalysisResult result = sleeplessNights.analyze(nightSessions);
@@ -197,7 +226,32 @@ public class SleepTrackerAppTest {
 
         SleepAnalysisResult result4 = sleeplessNights.analyze(nightSessions);
         assertEquals(4L, result4.getResult());
+
+        //пустой список
+        nightSessions.clear();
+        SleepAnalysisResult result5 = sleeplessNights.analyze(nightSessions);
+        assertEquals(0L, result5.getResult());
+
+        // Пересечение месяцев
+        nightSessions.add(new SleepingSession(
+                LocalDateTime.of(2024, 3, 31, 23, 0),
+                LocalDateTime.of(2024, 4, 1, 4, 0),
+                "NORMAL"
+        ));
+        SleepAnalysisResult result6 = sleeplessNights.analyze(nightSessions);
+        assertEquals(0L, result6.getResult());
+
+        // Сессия только утром
+        nightSessions.clear();
+        nightSessions.add(new SleepingSession(
+                LocalDateTime.of(2024, 4, 2, 2, 0),
+                LocalDateTime.of(2024, 4, 2, 7, 0),
+                "NORMAL"
+        ));
+        SleepAnalysisResult result7 = sleeplessNights.analyze(nightSessions);
+        assertEquals(1L, result7.getResult());
+
     }
-
-
 }
+
+

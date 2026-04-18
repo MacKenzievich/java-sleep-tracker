@@ -8,20 +8,26 @@ import java.util.List;
 import java.util.stream.LongStream;
 
 public class SleeplessNights implements SleepAnalysisFunction {
+    private static final LocalTime NIGHT_END_TIME = LocalTime.of(6, 0); // 6 утра
 
     @Override
     public SleepAnalysisResult analyze(List<SleepingSession> sessionList) {
+        if (sessionList == null || sessionList.isEmpty()) {
+            return new SleepAnalysisResult("Количество бессонных ночей", 0L);
+        }
 
+        // Находим первую и последнюю сессию
         LocalDateTime startFirstSession = sessionList.stream()
                 .map(SleepingSession::getStartSleep)
                 .min(LocalDateTime::compareTo)
-                .get();
+                .orElseThrow();
+
         LocalDateTime endLastSession = sessionList.stream()
                 .map(SleepingSession::getEndSleep)
                 .max(LocalDateTime::compareTo)
-                .get();
+                .orElseThrow();
 
-
+        // Определяем дату начала и конца анализа
         LocalDate startDate = startFirstSession.toLocalDate();
         if (startFirstSession.toLocalTime().isAfter(LocalTime.NOON)) {
             startDate = startDate.plusDays(1);
@@ -33,18 +39,24 @@ public class SleeplessNights implements SleepAnalysisFunction {
 
         long totalNights = ChronoUnit.DAYS.between(startDate, endDate);
         LocalDate finalStartDate = startDate;
-        long countNight = LongStream.range(0, totalNights)
+
+        long countBessonnyeNochei = LongStream.range(0, totalNights)
                 .mapToObj(i -> finalStartDate.plusDays(i))
-                .filter(night -> isSleeplessNight(night, sessionList))
+                .filter(night -> !hasSleepInNight(night, sessionList))
                 .count();
-        return new SleepAnalysisResult("Количество бессоных ночей", countNight);
+
+        return new SleepAnalysisResult("Количество бессонных ночей", countBessonnyeNochei);
     }
 
-    private static boolean isSleeplessNight(LocalDate night, List<SleepingSession> sessions) {
+    // Проверяет, есть ли сон в указанную ночь
+    private static boolean hasSleepInNight(LocalDate night, List<SleepingSession> sessions) {
         LocalDateTime nightStart = night.atStartOfDay();
-        LocalDateTime nightEnd = night.atTime(6, 0);
+        LocalDateTime nightEnd = night.atTime(NIGHT_END_TIME);
 
         return sessions.stream()
-                .noneMatch(session -> session.getStartSleep().isBefore(nightEnd) && session.getEndSleep().isAfter(nightStart));
+                .anyMatch(session ->
+                        session.getStartSleep().isBefore(nightEnd) &&
+                                session.getEndSleep().isAfter(nightStart)
+                );
     }
 }
