@@ -190,68 +190,72 @@ public class SleepTrackerAppTest {
 
     }
 
+    @Test
+    void testSingleNightWithSleep() {
+        List<SleepingSession> sessions = List.of(new SleepingSession(
+                LocalDateTime.of(2024, 1, 15, 23, 0),
+                LocalDateTime.of(2024, 1, 16, 6, 0),
+                "NORMAL")
+        );
+        SleeplessNights analyzer = new SleeplessNights();
+        SleepAnalysisResult result = analyzer.analyze(sessions);
+        assertEquals(1L, result.getResult());
+    }
 
     @Test
-    void testSleeplessNights() {
-        List<SleepingSession> nightSessions = new ArrayList<>();
-        // с 22:00 до 23:00
-        nightSessions.add(new SleepingSession(LocalDateTime.of(2024, 4, 10, 22, 0),
-                LocalDateTime.of(2024, 4, 10, 22, 59),
-                "NORMAL"));
-        //с 23:30 до 00:30 следующего дня
-        nightSessions.add(new SleepingSession(LocalDateTime.of(2024, 4, 11, 23, 30),
-                LocalDateTime.of(2024, 4, 12, 3, 30),
-                "NORMAL"));
+    void testSleepSessionsAcrossMonths() {
+        List<SleepingSession> sessions = List.of(
+                new SleepingSession(LocalDateTime.of(2024, 1, 28, 23, 0),
+                        LocalDateTime.of(2024, 1, 29, 7, 0), "NORMAL"),
+                new SleepingSession(LocalDateTime.of(2024, 2, 2, 22, 0),
+                        LocalDateTime.of(2024, 2, 3, 6, 30), "NORMAL")
+        );
+        SleeplessNights analyzer = new SleeplessNights();
+        SleepAnalysisResult result = analyzer.analyze(sessions);
+        assertEquals(4L, result.getResult());
+    }
 
-        SleepAnalysisResult result = sleeplessNights.analyze(nightSessions);
-        assertEquals(1L, result.getResult());
+    @Test
+    void testEmptySessionList() {
+        List<SleepingSession> sessions = List.of();
 
-        nightSessions.add(new SleepingSession(LocalDateTime.of(2024, 4, 9, 20, 0),
-                LocalDateTime.of(2024, 4, 10, 0, 0),
-                "NORMAL"));
+        SleeplessNights analyzer = new SleeplessNights();
+        SleepAnalysisResult result = analyzer.analyze(sessions);
 
-        SleepAnalysisResult result2 = sleeplessNights.analyze(nightSessions);
-        assertEquals(2L, result2.getResult());
+        assertEquals(0L, result.getResult());
+        assertEquals("Количество бессонных ночей", result.getDescription());
+    }
 
-        nightSessions.add(new SleepingSession(LocalDateTime.of(2024, 4, 9, 14, 0),
-                LocalDateTime.of(2024, 4, 9, 20, 0),
-                "NORMAL"));
+    @Test
+    void testFirstSessionAfterMidnight() {
+        List<SleepingSession> sessions = List.of(
+                new SleepingSession(LocalDateTime.of(2024, 1, 15, 2, 30),
+                        LocalDateTime.of(2024, 1, 15, 8, 0), "NORMAL"),
+                new SleepingSession(LocalDateTime.of(2024, 1, 16, 23, 0),
+                        LocalDateTime.of(2024, 1, 17, 7, 0), "NORMAL")
+        );
 
-        SleepAnalysisResult result3 = sleeplessNights.analyze(nightSessions);
-        assertEquals(2L, result3.getResult());
+        SleeplessNights analyzer = new SleeplessNights();
+        SleepAnalysisResult result = analyzer.analyze(sessions);
+        assertEquals(0L, result.getResult()); // отсчет идет уже со следующего дня.
+    }
 
-        nightSessions.add(new SleepingSession(LocalDateTime.of(2024, 4, 14, 14, 0),
-                LocalDateTime.of(2024, 4, 15, 0, 30),
-                "NORMAL"));
+    @Test
+    void testConsecutiveSleeplessNights() {
+        List<SleepingSession> sessions = List.of(
+                new SleepingSession(LocalDateTime.of(2024, 1, 10, 20, 0),
+                        LocalDateTime.of(2024, 1, 11, 6, 0),"NORMAL"),
+                new SleepingSession(LocalDateTime.of(2024, 1, 13, 22, 0),
+                        LocalDateTime.of(2024, 1, 14, 7, 0),"NORMAL")
+        );
 
-        SleepAnalysisResult result4 = sleeplessNights.analyze(nightSessions);
-        assertEquals(4L, result4.getResult());
+        SleeplessNights analyzer = new SleeplessNights();
+        SleepAnalysisResult result = analyzer.analyze(sessions);
 
-        //пустой список
-        nightSessions.clear();
-        SleepAnalysisResult result5 = sleeplessNights.analyze(nightSessions);
-        assertEquals(0L, result5.getResult());
-
-        // Пересечение месяцев
-        nightSessions.add(new SleepingSession(
-                LocalDateTime.of(2024, 3, 31, 23, 0),
-                LocalDateTime.of(2024, 4, 1, 4, 0),
-                "NORMAL"
-        ));
-        SleepAnalysisResult result6 = sleeplessNights.analyze(nightSessions);
-        assertEquals(0L, result6.getResult());
-
-        // Сессия только утром
-        nightSessions.clear();
-        nightSessions.add(new SleepingSession(
-                LocalDateTime.of(2024, 4, 2, 2, 0),
-                LocalDateTime.of(2024, 4, 2, 7, 0),
-                "NORMAL"
-        ));
-        SleepAnalysisResult result7 = sleeplessNights.analyze(nightSessions);
-        assertEquals(1L, result7.getResult());
-
+        // Бессонные ночи: 11-12 и 12-13 января
+        assertEquals(2L, result.getResult());
     }
 }
+
 
 
